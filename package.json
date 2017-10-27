@@ -1,0 +1,27 @@
+{
+  "name": "constructor_hangman",
+  "version": "1.0.0",
+  "description": "Hangman Game For Command-Line",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nanular/Constructor_Hangman.git"
+  },
+  "keywords": [
+    "[\"Hangman\"",
+    "\"Games\"",
+    "\"CLI\"]"
+  ],
+  "author": "Neil Zimmerman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nanular/Constructor_Hangman/issues"
+  },
+  "homepage": "https://github.com/nanular/Constructor_Hangman#readme",
+  "dependencies": {
+    "inquirer": "^3.3.0"
+  }
+}
