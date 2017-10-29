@@ -1,4 +1,4 @@
-var letter = require("./letter.js");
+//var letter = require("./letter.js");
 
 var selector = 0;
 
