@@ -2,7 +2,7 @@ var inquirer = require("inquirer");
 //var letter = require('./letter.js');
 //var word = require("./word.js");
 
-var firstGame = true;
+var roundCounter = -1;
 var guessesRemaining = 10;
 var selectedWords = {};
 var wordList =
@@ -22,6 +22,7 @@ var notguessedArray =
 
 var lettersToReveal = [];
 var displayString = "";
+var successMsg = "";
 
 
 function clear()
@@ -59,7 +60,6 @@ function Letter(word, letter)
 	this.containedInWord = false;
 	this.checkGuess = function checkGuess()
 	{
-		guessesRemaining--;
 
 		if (this.letter === this.letter.toLowerCase())
 		{
@@ -78,7 +78,13 @@ function Letter(word, letter)
 		
 		if (!this.containedInWord)
 		{
-			console.log("\nIncorrect! There are no " + this.letter + "'s in the word.")
+			guessesRemaining--;
+			successMsg = "Incorrect! There are no " + this.letter + "'s in the word.";
+		}
+
+		else if (this.containedInWord)
+		{
+			successMsg = "Excellent! '" + this.letter + "' was the right choice!"
 		}
 		return this.indexOfHits;
 	};
@@ -118,7 +124,7 @@ function WordUp(word)
 
 function playGame()
 {
-	if (firstGame)
+	if (roundCounter < 0)
 	{
 		console.log("");
 		console.log("Welcome To Command Line Hangman!");
@@ -134,7 +140,7 @@ function playGame()
 		{
 			if (answers.ready)
 			{
-				firstGame = false;
+				roundCounter++;
 				clear();
 				playGame();
 			} else { playGame(); }
@@ -143,19 +149,19 @@ function playGame()
 
 	else
 	{
-		if (guessesRemaining === 10)
+		if (roundCounter === 0)
 		{
 			var currentWord = new WordUp(randomWordSelector());
-			console.log("Current Word: " + currentWord.word);
+			console.log("Guesses Remaining: " + guessesRemaining);
 			currentWord.updateDisplayString(false);
 		}
 
-		else if (guessesRemaining > 0 && guessesRemaining < 10)
+		else if (guessesRemaining > 0)
 		{
-			clear();
 			console.log(displayString + "\n");
+			console.log("Any Passes Through Here?");
 		}
-		
+
 		promptForLetter(currentWord);
 	}
 }
@@ -173,30 +179,6 @@ function advanceGame(array, ask, currentWord)
 	console.log("\n" + displayString + "\n");
 
 	if (ask === false) { return; }
-	else if (guessesRemaining < 0)
-	{
-		console.log("I'm sorry!, you've run out of attempts.");
-
-		inquirer.prompt
-		([
-			{
-				type: "confirm",
-				name: "reveal",
-				message: "Would you like to have this word revealed?"
-			}
-		]).then(function(answers)
-		{
-			if (answers.reveal)
-			{
-				console.log("The word was " + currentWord.word.toUpperCase() + ".\n");
-			}
-
-			else
-			{
-				console.log("Well, alright then.");
-			}
-		})
-	}
 
 	else if (!currentWord.solved)
 	{
@@ -211,29 +193,74 @@ function advanceGame(array, ask, currentWord)
 	}
 }
 
-function promptForLetter(currentWord, callback)
+function promptForLetter(currentWord)
 {
-	inquirer.prompt
-	([
-		{
-			type: "input",
-			name: "guess",
-			message: "Guess a letter:",
-			validate: function (value)
-			{
-				if (value.charCodeAt(0) < 65 || (value.charCodeAt(0) > 90 && value.charCodeAt(0) < 97) || value.charCodeAt(0) > 122)
-				{
-					return false;
-				} else { return true; }
-			}
-		}
-	]).then(function(answers)
+	if (guessesRemaining === 0)
 	{
-		//clear();
-		var currentLetter = new Letter(currentWord, answers.guess);
-		var indexMatches = currentLetter.checkGuess();
-		currentWord.updateDisplayString(indexMatches);
-	})
+		clear();
+		console.log("Guesses Remaining: " + guessesRemaining + "\n");
+		console.log(displayString);
+		console.log("");
+		console.log("Letters Used: " + guessedArray.toString());
+		console.log("");
+		console.log("I'm sorry!, you've run out of attempts.");
+
+		inquirer.prompt
+		([
+			{
+				type: "confirm",
+				name: "reveal",
+				message: "Would you like to have this word revealed?"
+			}
+		]).then(function(answers)
+		{
+			if (answers.reveal)
+			{
+				console.log("\nThe word was " + currentWord.word.toUpperCase() + ".\n");
+			}
+
+			else
+			{
+				console.log("\nWell, alright then.");
+			}
+		})
+	}
+
+	else if (guessesRemaining < 10)
+	{
+		clear();
+		console.log("Guesses Remaining: " + guessesRemaining + "\n");
+		console.log(displayString);
+		console.log("");
+		console.log("Letters Used: " + guessedArray.toString());
+		console.log("");
+		console.log(successMsg);
+	}
+
+	if (guessesRemaining > 0)
+	{
+		inquirer.prompt
+		([
+			{
+				type: "input",
+				name: "guess",
+				message: "Guess a letter:",
+				validate: function (value)
+				{
+					if (value.charCodeAt(0) < 65 || (value.charCodeAt(0) > 90 && value.charCodeAt(0) < 97)
+						|| value.charCodeAt(0) > 122)
+					{ return false; } 
+					else { return true; }
+				}
+			}
+		]).then(function(answers)
+		{
+			roundCounter++;
+			var currentLetter = new Letter(currentWord, answers.guess);
+			var indexMatches = currentLetter.checkGuess();
+			currentWord.updateDisplayString(indexMatches);
+		})
+	}
 }
 
 
