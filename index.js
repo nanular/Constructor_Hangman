@@ -267,12 +267,6 @@ function promptForLetter(currentWord)
 				{
 					if (/^[A-Za-z]$/.test(value)) { return true; }
 					else { return false; }
-
-
-					// if (value.charCodeAt(0) < 65 || (value.charCodeAt(0) > 90 && value.charCodeAt(0) < 97)
-					// 	|| value.charCodeAt(0) > 122)
-					// { return false; } 
-					// else { return true; }
 				}
 			}
 		]).then(function(letterInput)
