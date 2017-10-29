@@ -4,7 +4,9 @@ var inquirer = require("inquirer");
 
 var roundCounter = -1;
 var guessesRemaining = 10;
+
 var selectedWords = {};
+var chosenWord = "";
 var wordList =
 [
 	"JAVASCRIPT", "NODE", "PROTOTYPE",
@@ -13,12 +15,6 @@ var wordList =
 	"GITHUB", "HEROKU", "JQUERY"
 ];
 var guessedArray = [];
-var notguessedArray = 
-[
-	"A", "B", "C", "D", "E", "F", "G", "H", "I",
-	"J", "K", "L", "M", "N", "O", "P", "Q", "R",
-	"S", "T", "U", "V", "W", "X", "Y", "Z"
-];
 
 var lettersToReveal = [];
 var displayString = "";
@@ -35,7 +31,7 @@ function randomWordSelector()
 {
 	var startingObjLength = Object.keys(selectedWords).length;
 	var randomizer = Math.floor((Math.random() * wordList.length));	
-	var chosenWord = wordList[randomizer];
+	chosenWord = wordList[randomizer];
 
 	selectedWords[chosenWord] = randomizer;
 	var endingObjLength = Object.keys(selectedWords).length;
@@ -152,16 +148,10 @@ function playGame()
 		if (roundCounter === 0)
 		{
 			var currentWord = new WordUp(randomWordSelector());
+			console.log("Current Word: " + currentWord.word);
 			console.log("Guesses Remaining: " + guessesRemaining);
 			currentWord.updateDisplayString(false);
 		}
-
-		else if (guessesRemaining > 0)
-		{
-			console.log(displayString + "\n");
-			console.log("Any Passes Through Here?");
-		}
-
 		promptForLetter(currentWord);
 	}
 }
@@ -176,7 +166,7 @@ function advanceGame(array, ask, currentWord)
 		tempString = displayString;
 	}
 
-	console.log("\n" + displayString + "\n");
+	//console.log("\n" + displayString + "\n");
 
 	if (ask === false) { return; }
 
@@ -186,10 +176,15 @@ function advanceGame(array, ask, currentWord)
 	}
 	else
 	{
+		clear();
+		console.log("Guesses Remaining: " + guessesRemaining + "\n");
+		console.log(displayString);
+		console.log("");
+		console.log("Letters Used: " + guessedArray.toString());
 		console.log("");
 		console.log("You did it!  Congratulations!")
 		console.log("");
-		return;
+		playAgain();
 	}
 }
 
@@ -221,12 +216,14 @@ function promptForLetter(currentWord)
 
 			else
 			{
-				console.log("\nWell, alright then.");
+				console.log("\nWell, alright then.\n");
 			}
+
+			playAgain();
 		})
 	}
 
-	else if (guessesRemaining < 10)
+	else if (roundCounter >= 0)
 	{
 		clear();
 		console.log("Guesses Remaining: " + guessesRemaining + "\n");
@@ -256,13 +253,53 @@ function promptForLetter(currentWord)
 		]).then(function(answers)
 		{
 			roundCounter++;
-			var currentLetter = new Letter(currentWord, answers.guess);
+			currentLetter = new Letter(currentWord, answers.guess);
 			var indexMatches = currentLetter.checkGuess();
 			currentWord.updateDisplayString(indexMatches);
 		})
 	}
 }
 
+function playAgain()
+{
+	// console.log("\nYou have played "
+	// 	+ Object.keys(selectedWords).length + " of the "
+	// 	+ wordList.length + " words available.\n");
+
+	inquirer.prompt
+	([
+		{
+			type: "confirm",
+			name: "newgame",
+			message: "Would you like to start a new game?"
+		}
+	]).then(function(answers)
+	{
+		lettersToReveal = [];
+		guessesRemaining = 10;
+		roundCounter = 0;
+		successMsg = "";
+		guessedArray = [];
+		displayString = "";
+		tempString = "";
+		currentWord = {};
+		currentLetter = {};
+		
+		if (answers.newgame)
+		{
+			clear();
+			playGame(); 
+		}
+
+		else
+		{
+			// console.log("\nYou're missing out on the other "
+			// 	+ ((wordList.length) - (Object.keys(selectedWords).length)) + " words available!\n");
+			return;
+		}
+	})
+
+}
 
 clear();
 playGame();
