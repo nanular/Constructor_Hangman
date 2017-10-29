@@ -31,6 +31,15 @@ function clear()
 }
 
 
+function sleep(milliseconds)
+{
+	var start = new Date().getTime();
+	for (var i = 0; i < 1e4; i++)
+	{
+		if ((new Date().getTime() - start) > milliseconds) { break };
+	}
+}
+
 function randomWordSelector()
 {
 	var randomizer = Math.floor((Math.random() * wordList.length));	
@@ -91,12 +100,11 @@ function Letter(word, letter)
 function WordUp(word)
 {
 	this.word = word;
-	this.charsToGuess = this.word.length;
+	this.charsToGuess = word.length;
 	this.solved = false;
-	this.lettersArray = this.word.split("");
+	this.lettersArray = word.split("");
 	this.updateDisplayString = function updateDisplayString(indexArray)
 	{
-
 		if (!indexArray)
 		{
 			for (i = 0; i < this.lettersArray.length; i++)
@@ -133,14 +141,21 @@ function playGame()
 				name: "ready",
 				message: "Are you ready to begin playing?"
 			}
-		]).then(function(answers)
+		]).then(function(response)
 		{
-			if (answers.ready)
+			if (response.ready)
 			{
 				roundCounter++;
 				clear();
 				playGame();
-			} else { playGame(); }
+				return;
+			} 
+
+			else
+			{
+				playGame();
+				return;
+			}
 		})
 	}
 
@@ -148,12 +163,16 @@ function playGame()
 	{
 		if (roundCounter === 0)
 		{
-			var currentWord = new WordUp(randomWordSelector());
+			randomWordSelector();
+			sleep(750);
+			console.log(chosenWord + "\n");
+			var currentWord = new WordUp(chosenWord);
 			console.log("Current Word: " + currentWord.word);
 			console.log("Guesses Remaining: " + guessesRemaining);
 			currentWord.updateDisplayString(false);
 		}
 
+		sleep(1000);
 		promptForLetter(currentWord);
 	}
 }
@@ -167,8 +186,6 @@ function advanceGame(array, ask, currentWord)
 		displayString = tempString.replace(/0/, lettersToReveal[k] + " ");
 		tempString = displayString;
 	}
-
-	//console.log("\n" + displayString + "\n");
 
 	if (ask === false) { return; }
 
@@ -187,6 +204,7 @@ function advanceGame(array, ask, currentWord)
 		console.log("You did it!  Congratulations!")
 		console.log("");
 		playAgain();
+		return;
 	}
 }
 
@@ -209,9 +227,9 @@ function promptForLetter(currentWord)
 				name: "reveal",
 				message: "Would you like to have this word revealed?"
 			}
-		]).then(function(answers)
+		]).then(function(revealResponse)
 		{
-			if (answers.reveal)
+			if (revealResponse.reveal)
 			{
 				console.log("\nThe word was " + currentWord.word.toUpperCase() + ".\n");
 			}
@@ -222,6 +240,7 @@ function promptForLetter(currentWord)
 			}
 
 			playAgain();
+			return;
 		})
 	}
 
@@ -244,18 +263,22 @@ function promptForLetter(currentWord)
 				type: "input",
 				name: "guess",
 				message: "Guess a letter:",
-				// validate: function (value)
-				// {
-				// 	if (value.charCodeAt(0) < 65 || (value.charCodeAt(0) > 90 && value.charCodeAt(0) < 97)
-				// 		|| value.charCodeAt(0) > 122)
-				// 	{ return false; } 
-				// 	else { return true; }
-				// }
+				validate: function (value)
+				{
+					if (/^[A-Za-z]$/.test(value)) { return true; }
+					else { return false; }
+
+
+					// if (value.charCodeAt(0) < 65 || (value.charCodeAt(0) > 90 && value.charCodeAt(0) < 97)
+					// 	|| value.charCodeAt(0) > 122)
+					// { return false; } 
+					// else { return true; }
+				}
 			}
-		]).then(function(answers)
+		]).then(function(letterInput)
 		{
 			roundCounter++;
-			currentLetter = new Letter(currentWord, answers.guess);
+			currentLetter = new Letter(currentWord, letterInput.guess);
 			var indexMatches = currentLetter.checkGuess();
 			currentWord.updateDisplayString(indexMatches);
 		})
@@ -271,6 +294,14 @@ function playAgain()
 	guessedArray = [];
 	displayString = "";
 	tempString = "";
+
+	if (chosenWordArray.length === wordList.length)
+	{
+		console.log("\nYou did it! You played all 12 words!");
+		console.log("Thanks for playing!\n");
+		return;
+	}
+
 	console.log("\nYou have played "
 		+ chosenWordArray.length + " of the "
 		+ wordList.length + " words available.\n")
@@ -282,13 +313,15 @@ function playAgain()
 			name: "newgame",
 			message: "Would you like to try and guess another?"
 		}
-	]).then(function(answers)
+	]).then(function(newgameAnswer)
 	{
 
-		if (answers.newgame)
+		if (newgameAnswer.newgame)
 		{
 			clear();
-			playGame(); 
+			console.log("Loading...")
+			setTimeout(playGame, 1200);
+			return;
 		}
 
 		else
