@@ -5,8 +5,9 @@ var inquirer = require("inquirer");
 var roundCounter = -1;
 var guessesRemaining = 10;
 
-var selectedWords = {};
 var chosenWord = "";
+var chosenWordArray = [];
+
 var wordList =
 [
 	"JAVASCRIPT", "NODE", "PROTOTYPE",
@@ -21,31 +22,31 @@ var displayString = "";
 var successMsg = "";
 
 
+
+
 function clear()
 {
 	process.stdout.write('\033[2J');
 	process.stdout.write('\033[0f');
-};
-
-function randomWordSelector()
-{
-	var startingObjLength = Object.keys(selectedWords).length;
-	var randomizer = Math.floor((Math.random() * wordList.length));	
-	chosenWord = wordList[randomizer];
-
-	selectedWords[chosenWord] = randomizer;
-	var endingObjLength = Object.keys(selectedWords).length;
-	if (startingObjLength === endingObjLength)
-	{
-		randomWordSelector();
-		return;
-	} else { return chosenWord; }
 }
 
 
+function randomWordSelector()
+{
+	var randomizer = Math.floor((Math.random() * wordList.length));	
+	chosenWord = wordList[randomizer];
+	if (chosenWordArray.some(x => x === chosenWord))
+	{
+		randomWordSelector();
+		return;
+	} 
 
-
-
+	else
+	{
+		chosenWordArray.push(chosenWord);
+		return chosenWord;
+	}
+}
 
 
 function Letter(word, letter)
@@ -152,6 +153,7 @@ function playGame()
 			console.log("Guesses Remaining: " + guessesRemaining);
 			currentWord.updateDisplayString(false);
 		}
+
 		promptForLetter(currentWord);
 	}
 }
@@ -242,13 +244,13 @@ function promptForLetter(currentWord)
 				type: "input",
 				name: "guess",
 				message: "Guess a letter:",
-				validate: function (value)
-				{
-					if (value.charCodeAt(0) < 65 || (value.charCodeAt(0) > 90 && value.charCodeAt(0) < 97)
-						|| value.charCodeAt(0) > 122)
-					{ return false; } 
-					else { return true; }
-				}
+				// validate: function (value)
+				// {
+				// 	if (value.charCodeAt(0) < 65 || (value.charCodeAt(0) > 90 && value.charCodeAt(0) < 97)
+				// 		|| value.charCodeAt(0) > 122)
+				// 	{ return false; } 
+				// 	else { return true; }
+				// }
 			}
 		]).then(function(answers)
 		{
@@ -262,29 +264,27 @@ function promptForLetter(currentWord)
 
 function playAgain()
 {
-	// console.log("\nYou have played "
-	// 	+ Object.keys(selectedWords).length + " of the "
-	// 	+ wordList.length + " words available.\n");
+	lettersToReveal = [];
+	guessesRemaining = 10;
+	roundCounter = 0;
+	successMsg = "";
+	guessedArray = [];
+	displayString = "";
+	tempString = "";
+	console.log("\nYou have played "
+		+ chosenWordArray.length + " of the "
+		+ wordList.length + " words available.\n")
 
 	inquirer.prompt
 	([
 		{
 			type: "confirm",
 			name: "newgame",
-			message: "Would you like to start a new game?"
+			message: "Would you like to try and guess another?"
 		}
 	]).then(function(answers)
 	{
-		lettersToReveal = [];
-		guessesRemaining = 10;
-		roundCounter = 0;
-		successMsg = "";
-		guessedArray = [];
-		displayString = "";
-		tempString = "";
-		currentWord = {};
-		currentLetter = {};
-		
+
 		if (answers.newgame)
 		{
 			clear();
@@ -293,8 +293,8 @@ function playAgain()
 
 		else
 		{
-			// console.log("\nYou're missing out on the other "
-			// 	+ ((wordList.length) - (Object.keys(selectedWords).length)) + " words available!\n");
+			console.log("\nYou're missing out on the other "
+				+ (wordList.length - chosenWordArray.length) + " words available!\n");
 			return;
 		}
 	})
