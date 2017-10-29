@@ -46,53 +46,7 @@ function randomWordSelector()
 }
 
 
-function advanceGame(array, ask, currentWord)
-{
-	var tempString = "0".repeat(array.length);
-	for (k = 0; k < array.length; k++)
-	{
-		displayString = tempString.replace(/0/, lettersToReveal[k] + " ");
-		tempString = displayString;
-	}
 
-	console.log("\n" + displayString + "\n");
-
-	if (ask === false) { return; }
-	else if (guessesRemaining < 0)
-	{
-		console.log("I'm sorry!, you've run out of attempts.");
-
-		inquirer.prompt
-		([
-			{
-				type: "confirm",
-				name: "reveal",
-				message: "Would you like to have this word revealed?"
-			}
-		]).then(function(answers)
-		{
-			if (answers.reveal)
-			{
-				console.log("The word was... ");
-				console.log(currentWord.word.toUpperCase() + "\n");	
-			}
-
-			else
-			{
-				console.log("Well, alright then.");
-			}
-		})
-	}
-
-	else if (!currentWord.solved)
-	{
-		promptForLetter(currentWord);
-	}
-	else
-	{
-		return;
-	}
-}
 
 
 
@@ -201,12 +155,59 @@ function playGame()
 			clear();
 			console.log(displayString + "\n");
 		}
-
-		// console.log(lettersToReveal);
-		// console.log("");
-		// console.log(lettersArray);
 		
 		promptForLetter(currentWord);
+	}
+}
+
+
+function advanceGame(array, ask, currentWord)
+{
+	var tempString = "0".repeat(array.length);
+	for (k = 0; k < array.length; k++)
+	{
+		displayString = tempString.replace(/0/, lettersToReveal[k] + " ");
+		tempString = displayString;
+	}
+
+	console.log("\n" + displayString + "\n");
+
+	if (ask === false) { return; }
+	else if (guessesRemaining < 0)
+	{
+		console.log("I'm sorry!, you've run out of attempts.");
+
+		inquirer.prompt
+		([
+			{
+				type: "confirm",
+				name: "reveal",
+				message: "Would you like to have this word revealed?"
+			}
+		]).then(function(answers)
+		{
+			if (answers.reveal)
+			{
+				console.log("The word was " + currentWord.word.toUpperCase() + ".\n");
+			}
+
+			else
+			{
+				console.log("Well, alright then.");
+			}
+		})
+	}
+
+	else if (!currentWord.solved)
+	{
+		promptForLetter(currentWord);
+	}
+	else
+	{
+		console.log("");
+		console.log("You did it!  Congratulations!")
+		console.log("");
+		return;
 	}
 }
 
@@ -235,7 +236,6 @@ function promptForLetter(currentWord, callback)
 	})
 }
 
-	
 
 clear();
 playGame();
