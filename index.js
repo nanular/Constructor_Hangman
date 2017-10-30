@@ -64,6 +64,12 @@ function Letter(word, letter)
 	this.wordToMatch = word;
 	this.indexOfHits = [];
 	this.containedInWord = false;
+	this.checkForDuplicate = function checkForDuplicate()
+	{
+		if (guessedArray.indexOf(this.letter) !== -1)
+		{ return true; }
+		else { return false; }
+	}
 	this.checkGuess = function checkGuess()
 	{
 
@@ -71,6 +77,14 @@ function Letter(word, letter)
 		{
 			this.letter = this.letter.toUpperCase();
 		}
+
+		if (this.checkForDuplicate())
+		{
+			successMsg = "You've already chosen letter " + this.letter
+			+ " for this puzzle.\nPlease choose a different letter.";
+			return false;
+		}
+
 		guessedArray.unshift(this.letter);
 		
 		for (i = 0; i < this.wordToMatch.word.length; i++)
@@ -120,7 +134,7 @@ function WordUp(word)
 				lettersToReveal[indexValue] = this.lettersArray[indexValue];
 			}
 			this.charsToGuess -= (indexArray.length);
-			if (this.charsToGuess === 0) { this.solved = true; }
+			if (lettersToReveal.indexOf("_ ") === -1) { this.solved = true; }
 
 			advanceGame(lettersToReveal, true, this);
 		}
@@ -274,7 +288,12 @@ function promptForLetter(currentWord)
 			roundCounter++;
 			currentLetter = new Letter(currentWord, letterInput.guess);
 			var indexMatches = currentLetter.checkGuess();
-			currentWord.updateDisplayString(indexMatches);
+			if (indexMatches !== false)
+			{
+				currentWord.updateDisplayString(indexMatches);
+			}
+
+			else { promptForLetter(currentWord); }
 		})
 	}
 }
