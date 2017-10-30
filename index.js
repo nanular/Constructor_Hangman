@@ -3,6 +3,7 @@ var inquirer = require("inquirer");
 //var word = require("./word.js");
 
 var roundCounter = -1;
+var notReady = false;
 var guessesRemaining = 10;
 
 var chosenWord = "";
@@ -26,8 +27,8 @@ var successMsg = "";
 
 function clear()
 {
-	process.stdout.write('\033[2J');
-	process.stdout.write('\033[0f');
+	process.stdout.write('\x1B[2J');
+	process.stdout.write('\x1B[H');
 }
 
 
@@ -148,6 +149,13 @@ function playGame()
 		console.log("");
 		console.log("Welcome To Command Line Hangman!");
 		console.log("All the words in this game will be related to web development and javascript programming.\n");
+		if (notReady)
+		{
+			console.log("When you are ready, just say so.");
+			console.log("");
+		} 
+		else { console.log(""); console.log(""); }
+		
 		inquirer.prompt
 		([
 			{
@@ -165,8 +173,10 @@ function playGame()
 				return;
 			} 
 
-			else
+			else if (!response.ready)
 			{
+				notReady = true;
+				clear();
 				playGame();
 				return;
 			}
